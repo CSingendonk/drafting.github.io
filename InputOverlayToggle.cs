@@ -3,7 +3,7 @@ using UnityEngine;
 public class MenuOverlay : MonoBehaviour
 {
     private CanvasGroup canvasGroup;
-    public bool isAnyShiftKeyDown;
+    private bool isAnyShiftKeyDown;
     
     void Start()
     {

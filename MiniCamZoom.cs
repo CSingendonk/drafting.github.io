@@ -74,7 +74,6 @@ public class MiniCamZoom : MonoBehaviour
     private bool isEngaged = false;
     private float lastTapTime;
 
-    // Define the screen portion for engagement (e.g., bottom right corner)
     private Rect engagementBounds = new Rect(0.7f, 0.3f, 0.3f, 0.5f);
 
     private void Update()
@@ -87,7 +86,7 @@ public class MiniCamZoom : MonoBehaviour
         }
 
         // Check for disengagement on right mouse click
-        if (isEngaged && Input.GetMouseButtonDown(1))
+        if (isEngaged && Input.GetMouseButton(1))
         {
             DisengageCameraControl();
         }

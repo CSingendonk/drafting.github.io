@@ -54,6 +54,7 @@ public class HotkeyHandlers : MonoBehaviour
                 {
                     if (thing == Actions)
                     {
+                        if (!keyMethods.ContainsKey(hotKey))
                         keyMethods.Add(hotKey, ActActs[thing]);
                     }
                 }
@@ -116,14 +117,7 @@ void ToggleOnScreenInputsOverlayVisible()
     {
         if (infoText != null)
         {
-            if (onscreenInputs != null || onscreenInputs.active)
-            {
-                infoText.SetActive(infoText.activeSelf ? false : true);
-            }
-            if (!onscreenInputs.active)
-            {
-                infoText.transform.parent.GetChild(infoText.transform.GetSiblingIndex());
-            }
+            infoText.SetActive(infoText.activeSelf ? false : true);
         }
     }
 

@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 public class PlayerObjIsHere : MonoBehaviour
 {
-    PlayerScript playerScript;
+    public PlayerScript playerScript;
     public enum ActionType
     {
         Action1,
@@ -41,16 +43,17 @@ public class PlayerObjIsHere : MonoBehaviour
     public GameObject playerCapsule; 
     public ActionType selectedAction;
 
-
+    
     //Crates
     public void Action1()
     {
-
         gameObject.SetActive(gameObject.activeSelf ? false : true);
-        playerScript.score++; // This assumes 'playerScore' is an integer variable in the PlayerScript
         playerScript.suppliesCollected += 10;
         playerScript.cratesCollected++;
-        Debug.Log("Action1 Done");
+        Debug.Log("Action1 Done", gameObject);
+        int score = (int)Mathf.Ceil(Mathf.Sqrt((playerScript.score * Time.realtimeSinceStartup)));
+        playerScript.scoreboard.GetComponentInChildren<TMP_Text>().textInfo.textComponent.text = "Score: " + score.ToString();
+        playerScript.lootDisplay.GetComponentInChildren<TMP_Text>().textInfo.textComponent.text = "Loot: " + playerScript.cratesCollected.ToString() + " of " + playerScript.cratesTotal.ToString();
     }
 
     //Set Self Inactive
@@ -58,6 +61,7 @@ public class PlayerObjIsHere : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
 
     private void TriggerEnter(GameObject other)
     {
