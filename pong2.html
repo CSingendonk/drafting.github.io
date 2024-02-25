@@ -1,8 +1,9 @@
+<!DOCTYPE-html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.75">
+    <title>Super Pong</title>
     <style>
         canvas
         {
@@ -28,7 +29,8 @@
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800px" height="400px"></canvas>
+    <label id="winNumLabel" for="winNumberInput" style="margin: 0 auto 0 auto; font-size:2rem; font-weight:400; display:none; justify-content:center; justify-self:center;"></label>
+    <canvas id="canvas" height="420" width="840"></canvas>
     <div style="
     display: flex;
     margin: auto;
@@ -38,25 +40,21 @@
     align-items: center;
     flex-wrap: nowrap;
     font-size: 1rem;
-    background-color: #1111111ff;
+    background-color: #111111ff;
 ">
         <label for="ballSpeed" style="
     margin-inline: 50px;
     font-size: 1rem;
     font-weight: 600;
 ">Ball Speed:</label>
-        <input type="number" id="ballSpeed" value="5" style="
-    width: 4%;
+        <input type="number" id="ballSpeed" value="5" style="width: 4%;
     padding-left: 0.25%;
     display: flex;
     max-width: 7.5%;
     justify-content: inherit;
     margin-right: initial;
     user-select: all;
-    counter-increment: auto;
-">
-        <br />
-
+    counter-increment: auto;" />
     </div>
     <div style="
     display: flex;
@@ -67,8 +65,7 @@
     align-items: stretch;
     flex-wrap: nowrap;
     font-size: 3rem;
-    background-color: #1111111f;
-">
+    background-color: #1111111f;">
         <span id="scoreLeft" style="
     border: 1px black solid;
     width: auto;
@@ -76,253 +73,826 @@
     padding-inline: 10px;
     background-color: red;
 ">0</span>
-        <button id="resetButton" margin-left="50%" style="
-    height: fit-content;
-    margin-top: auto;
-    margin-bottom: auto;
-    font-size: 1rem;
-    background-color: #9f0000f5;
-    color: floralwhite;
-">
+        <button id="resetButton" margin-left="50%" style="height: fit-content; margin-top: auto; margin-bottom: auto; font-size: 1rem; background-color: #9f0000f5; color: floralwhite;">
             Reset Score
         </button>
-        <span id="scoreRight" style="border: 1px black solid;background-color: green;padding-inline: 10px;">54</span>
+        <span id="scoreRight" style="border: 1px black solid;background-color: green;padding-inline: 10px;">0</span>
     </div>
+    <div style="display:inline-flex;">
+        <label for="gameModeSelect">Play Style =</label>
+        <select id="gameModeSelect" style="width: 30vw; height: 2.5rem; margin: 0 auto; text-align:center; font-size: 2rem; font-weight: 300;">
+            <option inert value="default">Select Style</option>
+            <option value="twoPaddles">Two Paddles</option>
+            <option value="fourPaddles">Four Paddles</option>
+        </select>
+        <label for="winConditionSelect">Game Mode =</label>
+        <div style="display: block; max-width: 30vw;">
+            <select id="winConditionSelect" style="width: 100%; height: 2.5rem; margin: 0 auto; text-align:center; font-size: 2rem; font-weight: 300;  ">
+                <option value="default">Default</option>
+                <option title="Unlimited scoring" value="noWin">No Limit</option>
+                <option title="First to score # points wins" value="firstToX">First to #</option>
+                <option title="Score more than 50% of # to win" value="bestOfX">Best of #</option>
+                <option title="First to score wins" value="deathmatch">Quickmatch</option>
+                <option title="Score # times in a row to win" value="domination">No Contest</option>
+                <option title="Score the most points in # minutes to win" value="timedMatch">Timed Match</option>
+            </select>
+            <input type="number" inert id="winNumberInput" min="1" step="1" value="3" name="winNumIn" style="display: inline-flex;font-size: 2rem; font-weight: 400; width:stretch; margin: 0 auto; opacity: 0;" />
+        </div>
+        <span id="winSubConditionIn">
+            <label id="winTimeLabel" for="winTimeInput" style="font-size:2rem; font-weight:400; display:none;"></label>
+            <input type="time" id="winTimeInput" name="winTimeIn" style="display: none" />
+        </span>
+    </div>
+    <audio hidden controls="controls" id="snap">
+        <source src="Recording%20(5).mp3" type="audio/mp3" />
+    </audio>
+    <audio hidden controls="controls" id="bounce">
+        <source src="Recording%20(5).mp3" type="audio/mp3" />
+    </audio>
+    <audio hidden controls="controls" id="popmp3">
+        <source src="./data/pop.mp3" type="audio/mp3" />
+    </audio>
+    <audio hidden controls="controls" id="eeoo">
+        <source src="./data/eeoootrimmed.mp3" type="audio/mp3" />
+    </audio>
+    <!-- <script src="c:\users\cps13\source\repos\NodejsWebApp3\pages\css\JavaScript.js"></script>-->
     <script>
-        // Setup canvas
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-
-        // Define paddles
-        const paddleHeight = canvas.width / 10;
-        const paddleWidth = (canvas.height * 2) / paddleHeight;
-        const paddleSpeed = 5;
-
-        let leftPaddle = {
-            x: 20,
-            y: canvas.height / 2 - paddleHeight / 2,
-            dy: 0
-        };
-
-        let rightPaddle = {
-            x: canvas.width - paddleWidth - 20,
-            y: canvas.height / 2 - paddleHeight / 2,
-            dy: 0
-        };
-
-        // Define ball
-
-        let ballSpeed = 5;
-        const ballSize = paddleHeight / ballSpeed;
-        let ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            dx: ballSpeed,
-            dy: ballSpeed
-        };
-
-        // Define score variables
-        let scoreLeft = 0;
-        let scoreRight = 0;
-
-        // Setup score display
-        const scoreLeftDisplay = document.getElementById("scoreLeft");
-        const scoreRightDisplay = document.getElementById("scoreRight");
-        updateScoreDisplay();
-        const scoreLeftElement = document.getElementById("scoreLeft");
-        const scoreRightElement = document.getElementById("scoreRight");
-
-        const numericScoreLeft = parseInt(scoreLeftDisplay.textContent);
-        const numericScoreRight = parseInt(scoreRightDisplay.textContent);
-
-        scoreLeftElement.style.backgroundColor = (numericScoreLeft > numericScoreRight) ? "green" : (numericScoreLeft < numericScoreRight) ? "red" : "yellow";
-        scoreRightElement.style.backgroundColor = (numericScoreLeft < numericScoreRight) ? "green" : (numericScoreLeft > numericScoreRight) ? "red" : "yellow";
-
-
-        // Setup ball speed input
-        const ballSpeedInput = document.getElementById("ballSpeed");
-        ballSpeedInput.addEventListener("input", function () {
-            let speed = parseInt(ballSpeedInput.value);
-            if (!isNaN(speed)) {
-                ballSpeed = speed;
-                ball.dx = ballSpeed;
-                ball.dy = ballSpeed;
-            }
-        });
-
-        // Setup reset button
-        const resetButton = document.getElementById("resetButton");
-        resetButton.addEventListener("click", function () {
-            scoreLeft = 0;
-            scoreRight = 0;
-            updateScoreDisplay();
-        });
-
-        // Draw paddles
-        function drawPaddle(x, y) {
-            ctx.fillRect(x, y, paddleWidth, paddleHeight);
-            ctx.fillStyle = "white"
-        }
-
-        // Draw ball
-        function drawBall(x, y) {
-            ctx.beginPath();
-            ctx.arc(x, y, ballSize, 0, Math.PI * 2);
-            ctx.fillStyle = "white";
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        // Clear canvas
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Update positions
-        function update() {
-            // Update left paddle
-            leftPaddle.y += leftPaddle.dy;
-            if (leftPaddle.y < 0) leftPaddle.y = 0;
-            if (leftPaddle.y + paddleHeight > canvas.height) leftPaddle.y = canvas.height - paddleHeight;
-
-            // Update right paddle
-            rightPaddle.y += rightPaddle.dy;
-            if (rightPaddle.y < 0) rightPaddle.y = 0;
-            if (rightPaddle.y + paddleHeight > canvas.height) rightPaddle.y = canvas.height - paddleHeight;
-
-            // Update ball position
-            ball.x += ball.dx;
-            ball.y += ball.dy;
-
-            // Check collision with walls
-            if (ball.y + ballSize >= canvas.height - 1 || ball.y - ballSize <= 1) {
-                ball.dy = -ball.dy;
-            }
-
-            // Check collision with paddles
-            if (
-                ball.x - ballSize <= leftPaddle.x + paddleWidth - 1 &&
-                ball.y >= leftPaddle.y &&
-                ball.y <= leftPaddle.y + paddleHeight + 1
-            ) {
-                ball.dx = -ball.dx;
-            }
-
-            if (
-                ball.x + ballSize >= rightPaddle.x &&
-                ball.y >= rightPaddle.y + 1 &&
-                ball.y <= rightPaddle.y - 1 + paddleHeight
-            ) {
-                ball.dx = -ball.dx;
-            }
-
-            // Check for scoring
-            if (ball.x - ballSize - 1 <= 0) {
-                // Right player scores
-                scoreRight++;
-                updateScoreDisplay();
-                resetBall();
-            }
-
-            if (ball.x + ballSize + 1 >= canvas.width - 1) {
-                // Left player scores
-                scoreLeft++;
-                updateScoreDisplay();
-                resetBall();
-            }
-
-        }
-
-        function randomupdown() {
-            let updown = 0;
-            updown = Math.random() > 0.5 ? 1 : -1;
-            return updown;
-        }
-
-        // Reset ball position
-        function resetBall() {
-            let rnd = (Math.random() * (canvas.height / ball.y))
-            let rndAngle = 180 - (Math.random() * Math.PI * 2); // Random angle in radians
-            let speedMultiplier = 1.15; // Adjust this multiplier to control the speed of the reset ball
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            let dx = ballSpeed * speedMultiplier;
-           // ball.dy = ballSpeed * speedMultiplier;
-           // ball.dx = dx > ball.dy ? dx * randomupdown() : ball.dy + ballSpeed * randomupdown();
-            ball.dx = dx * randomupdown();
-            ball.dy = (Math.random() * (ballSpeed / 2)) * randomupdown();
-            //ball.dy = ball.dy * randomupdown();
-        }
-
-
-        // Update score display
-        function updateScoreDisplay() {
-            scoreLeftDisplay.textContent = scoreLeft;
-            scoreRightDisplay.textContent = scoreRight;
+        {
+            let vsAI = true;
+            const pongscript = globalThis;
+            const canvas = document.getElementById("canvas"), ctx = canvas.getContext("2d"), snapmp3 = document.getElementById('snap'), ogBallSize = (canvas.width / 6) / 5;
+            const ballSpeedInput = document.getElementById("ballSpeed");
+            const resetButton = document.getElementById("resetButton");
             const scoreLeftElement = document.getElementById("scoreLeft");
             const scoreRightElement = document.getElementById("scoreRight");
-
+            const scoreLeftDisplay = document.getElementById("scoreLeft");
+            const scoreRightDisplay = document.getElementById("scoreRight");
+            const gameModeSelect = document.getElementById("gameModeSelect");
+            const subConNumLabel = document.getElementById("winNumLabel");
+            const winConSelect = document.getElementById("winConditionSelect");
+            let gameOver = false, gameMode = 'default', powerupsEnabled = true, paddleHeight = canvas.width / 6, paddleWidth = (canvas.height * 2) / paddleHeight, ballSpeed = 5, paddleSpeed = 7.5, paddleFill = 'white', ballSize = canvas.width / (paddleWidth * ballSpeed) / 2, scoreLeft = 0, scoreRight = 0;
+            let scoreHistory = [];
+            let tbPaddleHeight = paddleHeight, tbPaddleWidth = paddleWidth, tbPaddleFill;
+            let leftPaddle = {
+                x: 20,
+                y: canvas.height / 2 - paddleHeight / 2,
+                dy: 0
+            };
+            let rightPaddle = {
+                x: canvas.width - paddleWidth - 20,
+                y: canvas.height / 2 - paddleHeight / 2,
+                dy: 0
+            };
+            let topPaddle = {
+                wide: paddleHeight,
+                high: paddleWidth,
+                x: (canvas.width / 2) - (paddleHeight / 2),
+                y: paddleWidth * 2,
+                dy: 0,
+                dx: 0
+            };
+            let bottomPaddle = {
+                wide: paddleHeight,
+                high: paddleWidth,
+                x: (canvas.width / 2) - (paddleHeight / 2),
+                y: canvas.height - (paddleWidth * 2),
+                dy: 0,
+                dx: 0
+            };
+            let ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                dx: ballSpeed,
+                dy: ballSpeed,
+                fill: 'white',
+                mod: ''
+            };
+            // Define power-up object
+            let powerUp = {
+                x: canvas.width / 2, // Initial x position
+                y: canvas.height / 2, // Initial y position
+                width: ballSize, // Power-up width
+                height: ballSize, // Power-up height
+                active: true, // Indicates if the power-up is active
+                drawn: true, // Is powerUp on canvas
+                type: '', // Type of power-up (e.g., 'multiply', 'speedUp', 'speedDown')
+            };
+            subConNumLabel.textContent = 'New Match: No Limit | 4 Paddles';
+            let pwrup = canvas.getContext("2d");
+            // Setup score display
+            updateScoreDisplay();
             const numericScoreLeft = parseInt(scoreLeftDisplay.textContent);
             const numericScoreRight = parseInt(scoreRightDisplay.textContent);
-
             scoreLeftElement.style.backgroundColor = (numericScoreLeft > numericScoreRight) ? "green" : (numericScoreLeft < numericScoreRight) ? "red" : "yellow";
             scoreRightElement.style.backgroundColor = (numericScoreLeft < numericScoreRight) ? "green" : (numericScoreLeft > numericScoreRight) ? "red" : "yellow";
-        }
+            // Setup ball speed input
+            ballSpeedInput.addEventListener("input", function () {
+                let speed = parseInt(ballSpeedInput.value);
+                if (!isNaN(speed)) {
+                    ballSpeed = speed;
+                    paddleSpeed = ballSpeed * 1.25; // Update paddle speed based on ball speed
+                    ball.dx = ballSpeed;
+                    ball.dy = ballSpeed;
+                }
+            });
 
-        // Draw everything
-        function draw() {
-            clearCanvas();
-            ctx.fillStyle = "white";
+            function resetScoreDisplays() {
+                scoreLeft = 0;
+                scoreRight = 0;
+                updateScoreDisplay();
+            };
 
+            // Setup reset button
+            resetButton.addEventListener("click", function () {
+                resetScoreDisplays();
+            });
             // Draw paddles
-            drawPaddle(leftPaddle.x, leftPaddle.y);
-            drawPaddle(rightPaddle.x, rightPaddle.y);
-
+            function drawPaddle(x, y) {
+                ctx.fillStyle = ball.mod == 'paddleShort' ? 'pink' : (ball.mod == 'paddleTall' ? 'yellow' : 'white');
+                ctx.fillRect(x, y, paddleWidth, paddleHeight);
+            };
+            function drawHorizontalPaddles(x, y) {
+                if (gameMode != 'twoPaddles') {
+                    ctx.fillStyle = ball.mod == 'paddleShort' ? 'pink' : (ball.mod == 'paddleTall' ? 'yellow' : 'white');
+                } else {
+                    ctx.fillStyle = 'black';
+                }
+                ctx.fillRect(y, x, paddleHeight, paddleWidth);
+            };
             // Draw ball
-            drawBall(ball.x, ball.y);
-        }
-
-        // Handle keyboard input
-        document.addEventListener("keydown", function (event) {
-            switch (event.key) {
-                case "w":
-                    leftPaddle.dy = -paddleSpeed;
-                    break;
-                case "s":
-                    leftPaddle.dy = paddleSpeed;
-                    break;
-                case "ArrowUp":
-                    rightPaddle.dy = -paddleSpeed;
-                    break;
-                case "ArrowDown":
-                    rightPaddle.dy = paddleSpeed;
-                    break;
+            function drawBall(x, y) {
+                ctx.beginPath();
+                ctx.arc(x, y, ballSize, 0, Math.PI * 2);
+                ctx.fillStyle = ball.fill;
+                ctx.fill();
+                ctx.closePath();
+                paddleSpeed = ballSpeed * 1.5;
             }
-        });
 
-        document.addEventListener("keyup", function (event) {
-            switch (event.key) {
-                case "w":
-                case "s":
-                    leftPaddle.dy = 0;
-                    break;
-                case "ArrowUp":
-                case "ArrowDown":
-                    rightPaddle.dy = 0;
-                    break;
+            function fourPaddles() {
+                tbPaddleWidth = paddleHeight;
+                tbPaddleHeight = paddleWidth;
+                topPaddle.wide = tbPaddleWidth;
+                topPaddle.high = tbPaddleHeight;
+                topPaddle.x = (canvas.width / 2) - (topPaddle.wide / 2);
+                topPaddle.y = topPaddle.high * 2.5;
+                bottomPaddle.wide = tbPaddleWidth;
+                bottomPaddle.high = tbPaddleHeight;
+                bottomPaddle.x = (canvas.width / 2) - (bottomPaddle.wide / 2); // tbPaddleHeight,
+                bottomPaddle.y = canvas.height - (bottomPaddle.high * 2);
             }
-        });
 
-        // Game loop
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
+            function noTopBottomPaddles() {
+                tbPaddleWidth = canvas.width;
+                tbPaddleHeight = paddleWidth;
+                topPaddle.y = topPaddle.high * 2.5;
+                topPaddle.x = 0;
+                topPaddle.wide = tbPaddleWidth;
+                bottomPaddle.y = canvas.height - bottomPaddle.high;
+                bottomPaddle.x = 0;
+                bottomPaddle.wide = tbPaddleWidth;
+            }
 
-        gameLoop();
+            gameModeSelect.addEventListener("change", function () {
+                const selectedMode = gameModeSelect.value;
+                applyGameMode(selectedMode);
+                resetScoreDisplays();
+            });
+
+            let currentWinNum = 3;
+            const winSubConNumInput = document.getElementById("winNumberInput");
+
+            winConSelect.addEventListener("change", function () {
+                const condition = winConSelect.value;
+                if (condition != 'noWin' || condition != 'deathmatch' || condition != 'timedMatch') {
+                    winSubConNumInput.style.opacity = 1;
+                    winSubConNumInput.inert = false;
+                    let p = prompt('Define the score that takes the win:', '3');
+                    try {
+                        parseInt(p);
+                    }
+                    catch {
+                        p = '3';
+                    }
+                    winSubConNumInput.value = parseInt(p);
+                }
+                resetScoreDisplays();
+                checkWinCondition(condition);
+            });
+
+
+
+            function getMatchTimer(elapsed) {
+                const matchDuration = parseInt(document.getElementById("winNumberInput").value); // Duration of the match in minutes
+                return (matchDuration * 60) - elapsed; // Calculate end time
+            }
+
+            // Check win condition
+            function checkWinCondition(winCondition) {
+                const winNumber = parseInt(document.getElementById("winNumberInput").value);
+
+                switch (winCondition) {
+                    case "noWin":
+                        // No limit win condition - do nothing
+                        break;
+                    case "firstToX":
+                        // First to score # points wins
+                        if (scoreLeft >= winNumber || scoreRight >= winNumber) {
+                            // End the game, display winner
+                            endGame(scoreLeft > scoreRight ? "Left Player" : "Right Player");
+                        }
+                        if (subConNumLabel.style.display == 'none' || winNumber != currentWinNum) {
+                            subConNumLabel.style.display = 'inline-flex';
+                            currentWinNum = winNumber;
+                            subConNumLabel.textContent = 'First To Score ' + winNumber + '!';
+                        }
+                        break;
+                    case "bestOfX":
+                        // Score more than 50% of # to win
+                        const totalScore = winNumber % 2 === 0 ? (winNumber / 2) : Math.floor(winNumber / 2);
+                        if ((scoreLeft > totalScore || scoreRight > totalScore)) {
+                            // End the game, display winner
+                            endGame(scoreLeft > scoreRight ? "Left Player" : "Right Player");
+                        }
+                        if (subConNumLabel.style.display == 'none' || winNumber != currentWinNum) {
+                            subConNumLabel.style.display = 'inline-flex';
+                            subConNumLabel.textContent = 'Score ' + (winNumber % 2 != 0 ? Math.ceil(winNumber / 2) : (Math.ceil(winNumber / 2) + 1)) + ' Points!';
+                            currentWinNum = winNumber;
+
+                        }
+                        break;
+                    case "deathmatch":
+                        // First to score wins
+                        if (scoreLeft > 0 || scoreRight > 0) {
+                            // End the game, display winner
+                            endGame(scoreLeft > scoreRight ? "Left Player" : "Right Player");
+                        }
+                        if (winSubConNumInput.style.display != 'none' || winNumber != 0 || subConNumLabel.textContent != 'First To Score!') {
+                            subConNumLabel.style.display = 'inline-flex';
+                            subConNumLabel.textContent = 'First To Score!';
+                            winSubConNumInput.style.display = 'none';
+                        }
+                        break;
+                    case "domination":
+                        // Score # times in a row to win
+                        const consecutiveWins = parseInt(document.getElementById("winNumberInput").value); // Number of consecutive wins required
+                        const consecutiveWinner = (scoreLeft >= consecutiveWins) ? "leftPlayer" : (scoreRight >= consecutiveWins) ? "rightPlayer" : null;
+                        if (consecutiveWinner) {
+                            // Check if the consecutive wins condition is met
+                            let leftConsecutive = 0;
+                            let rightConsecutive = 0;
+                            for (let i = 0; i < scoreHistory.length; i++) {
+                                if (scoreHistory[i] === "leftPlayer") {
+                                    leftConsecutive++;
+                                    rightConsecutive = 0;
+                                } else if (scoreHistory[i] === "rightPlayer") {
+                                    rightConsecutive++;
+                                    leftConsecutive = 0;
+                                }
+                                if (leftConsecutive >= consecutiveWins || rightConsecutive >= consecutiveWins) {
+                                    // End the game, display winner
+                                    endGame(consecutiveWinner);
+                                    break;
+                                }
+                            }
+                        }
+                        if (subConNumLabel.style.display == 'none' || winNumber != currentWinNum) {
+                            subConNumLabel.style.display = 'inline-flex';
+                            currentWinNum = winNumber;
+                            subConNumLabel.textContent = 'Score ' + winNumber + ' Back-to-Back!';
+                        }
+                        break;
+                    case "timedMatch":
+                        // Score the most points in # minutes to win
+                        let endTime = 0;
+                        if (subConNumLabel.style.display == 'none' || winNumber != currentWinNum) {
+                            subConNumLabel.style.display = 'inline-flex';
+                            subConNumLabel.textContent = 'Highest Score After' + winNumber + ' Minutes! ' + winNumber + ' Remaining!';
+                            currentWinNum = winNumber;
+
+                        }
+                        const interval = setInterval(() => {
+                            endTime++;
+                            const et = getMatchTimer(endTime) / 60;
+                            let tr = et.toPrecision(2);
+
+                            subConNumLabel.textContent = 'Highest Score After' + winNumber + ' Minutes! ' + tr + ' Remaining!';
+                            if (getMatchTimer(endTime) == 0) {
+                                // End of match
+                                clearInterval(interval); // Stop the interval
+                                // Determine winner based on points
+                                const winner = (scoreLeft > scoreRight) ? "Left Player" : (scoreRight > scoreLeft) ? "Right Player" : "Tie";
+                                endGame(winner); // End the game and display winner
+                            }
+                        }, 1000); // Check every second
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // End game
+            function endGame(winner) {
+                gameOver = true;
+                alert("Game Over! Winner: " + winner);
+                resetScoreDisplays();
+                //checkWinCondition(winConSelect.value);
+            };
+
+            // Function to apply selected placeholder
+            function applyGameMode(mode) {
+                gameMode = mode;
+                switch (mode) {
+                    case "default":
+                        fourPaddles();
+                        break;
+                    case "twoPaddles":
+                        noTopBottomPaddles();
+                        break;
+                    case "fourPaddles":
+                        fourPaddles();
+                        break;
+                    default:
+                        break;
+                }
+            };
+
+            /**
+             * Returns the string-type name of the colour related to the 'type' name string of the power-up passed in.
+             * @param {string} pwrType
+             * @returns {'colour name'}
+             */
+            function getActivePowerUpColour(pwrType) {
+                return pwrType === 'speedUp' ? "green" : (pwrType == '' ? 'white' : (pwrType === 'speedDown' ? "red" : (pwrType === 'ballBig' ? "cyan" : (pwrType === 'ballSmall' ? "orange" : pwrType === 'paddleShort' ? 'pink' : (pwrType === 'paddleTall' ? 'yellow' : 'white')))));
+            };
+
+            /**
+             * Draw power-up object
+             * @returns {nothing}
+             */
+            function drawPowerUp() {
+                if (powerUp.active && powerupsEnabled) {
+                    pwrup.fillStyle = getActivePowerUpColour(powerUp.type);
+                    pwrup.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+                    powerUp.drawn = true;
+                }
+            };
+            // Check collision between ball and power-up
+            function checkPowerUpCollision() {
+                if (powerUp.active && powerupsEnabled &&
+                    ball.x + ballSize >= powerUp.x &&
+                    ball.x - ballSize <= powerUp.x + (powerUp.width / 2) &&
+                    ball.y + ballSize >= powerUp.y &&
+                    ball.y - ballSize <= powerUp.y + (powerUp.height / 2)) {
+                    ball.fill = getActivePowerUpColour(powerUp.type);
+                    applyPowerUpEffect();
+                    resetPowerUp();
+                }
+            };
+            // Reset power-up position after collision
+            function resetPowerUp() {
+                if (powerupsEnabled) {
+                    powerUp.active = false;
+                    powerUp.drawn = false;
+                    generatePowerUp();
+                }
+            };
+            // Apply effect when ball hits power-up
+            function applyPowerUpEffect() {
+                if (powerupsEnabled) {
+                    ball.fill = 'white';
+                    ball.mod = '';
+                    ballSize = ogBallSize;
+                    ballSpeed = (canvas.width / ogBallSize) / Math.ceil(Math.sqrt(parseInt(ballSpeedInput.value)));
+                    // Implement desired effects based on power-up type
+                    switch (powerUp.type) {
+                        case 'speedUp':
+                            // Speed up the ball
+                            ballSpeed *= 1.1;
+                            ball.dx *= 1.1;
+                            ball.dy *= 1.1;
+                            paddleSpeed *= 1.1;
+                            break;
+                        case 'speedDown':
+                            // Slow down the ball
+                            ballSpeed /= 1.1;
+                            ball.dx /= 1.1;
+                            ball.dy /= 1.1;
+                            paddleSpeed /= 1.1;
+                            break;
+                        case 'ballBig':
+                            ballSize *= 1.25;
+                            ballSpeed /= 1.25;
+                            break;
+                        case 'ballSmall':
+                            ballSize *= 0.75;
+                            ballSpeed *= 1.25;
+                            break;
+                        case 'paddleShort':
+                            paddleHeight *= 0.85;
+                            break;
+                        case 'paddleTall':
+                            paddleHeight *= 1.15;
+                            break;
+                        case '':
+                            ballSpeed = parseInt(ballSpeedInput.value);
+                            paddleSpeed = ballSpeed * 1.5; // Update paddle speed based on ball speed
+                            paddleHeight = canvas.width / 6;
+                            ballSize = ogBallSize;
+                            ball.fill = ball.fill == '' ? 'white' : getActivePowerUpColour(powerUp.type);
+                            break;
+                        // Add more cases for additional power-up types as needed
+                    }
+                    paddleSpeed = ballSpeed * 1.5; // Update paddle speed based on ball speed
+                    ball.mod = powerUp.type;
+                    powerUp.drawn = false;
+                    powerUp.active = false;
+                }
+            };
+            // Generate random power-up
+            function generatePowerUp() {
+                if (powerupsEnabled) {
+                    if ((ball.dx == 0 && ball.dy == 0) || powerUp.active || powerUp.drawn) {
+                        return;
+                    }
+                    powerUp.active = true;
+                    powerUp.x = (canvas.width / 2) + (paddleWidth + (Math.random() * ((canvas.width / 2.5) - powerUp.width) - paddleWidth) * randomupdown());
+                    powerUp.y = (canvas.height / 2) + (Math.random() * ((canvas.height / 2.5) - (powerUp.height * 1.5)) * randomupdown());
+                    // Randomly assign a type to the power-up
+                    const types = ['speedUp', 'speedDown', 'ballBig', 'ballSmall', 'paddleShort', 'paddleTall']; // Add more types as needed
+                    powerUp.type = types[Math.floor(Math.random() * types.length)];
+                    // Interval for cycling through power-up types
+                    const interval = (Math.random() * 5000) + 1;
+                    // Cycle through power-up types until collision with ball
+                    const cycleInterval = setTimeout(() => {
+                        powerUp.type = types[Math.floor(Math.random() * types.length)];
+                        if (powerUp.type == ball.mod || powerUp.type == '' || powerUp.active == false || ball.mod == '' || powerUp.drawn == '') {
+                            resetPowerUp();
+                        }
+                        else { drawPowerUp(); }
+                    }, interval);
+                    // Check collision with ball
+                    const checkCollisionInterval = setInterval(() => {
+                        if (ball.x + ballSize >= powerUp.x && ball.x - ballSize <= powerUp.x + powerUp.width &&
+                            ball.y + ballSize >= powerUp.y && ball.y - ballSize <= powerUp.y + powerUp.height) {
+                            applyPowerUpEffect();
+                            clearInterval(checkCollisionInterval);
+                            clearTimeout(cycleInterval);
+                            resetPowerUp();
+                        }
+                    }, 50); // Check collision every 50 milliseconds
+                }
+            };
+
+            // Clear canvas
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            };
+
+            // Update top and bottom paddles' positions
+            function updateTopBottomPaddles() {
+                topPaddle.x += topPaddle.dx;
+                if (topPaddle.x < 0) topPaddle.x = 0;
+                if (topPaddle.x + tbPaddleWidth > canvas.width) topPaddle.x = canvas.width - tbPaddleWidth;
+                bottomPaddle.x += bottomPaddle.dx;
+                if (bottomPaddle.x < 0) bottomPaddle.x = 0;
+                if (bottomPaddle.x + tbPaddleWidth > canvas.width) bottomPaddle.x = canvas.width - tbPaddleWidth;
+            };
+            // Draw top and bottom paddles
+            function drawTopBottomPaddles() {
+                drawHorizontalPaddles(topPaddle.y, topPaddle.x);
+                drawHorizontalPaddles(bottomPaddle.y, bottomPaddle.x);
+            };
+
+            // Update positions
+            function update() {
+                // Update left paddle
+                leftPaddle.y += leftPaddle.dy;
+                if (leftPaddle.y < 0) leftPaddle.y = 0;
+                if (leftPaddle.y + paddleHeight > canvas.height) leftPaddle.y = canvas.height - paddleHeight;
+                // Update right paddle
+                rightPaddle.y += rightPaddle.dy;
+                if (rightPaddle.y < 0) rightPaddle.y = 0;
+                if (rightPaddle.y + paddleHeight > canvas.height) rightPaddle.y = canvas.height - paddleHeight;
+                // Update top and bottom paddles
+                updateTopBottomPaddles();
+                // Update ball position
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+                // Check collision with walls
+                if (gameMode == 'twoPaddles')
+                    if (ball.y + (ballSize / 2) >= canvas.height - 1 || ball.y - (ballSize / 2) <= 1) {
+                        ball.dy = -ball.dy;
+                        document.getElementById('bounce').play();
+                        return;
+                    }
+                // Check collision with paddles
+                // Bounce off left
+                if (
+                    ball.x - ballSize - 1 <= leftPaddle.x + paddleWidth &&
+                    ball.y >= leftPaddle.y - 1 &&
+                    ball.y <= leftPaddle.y + paddleHeight + 1
+                ) {
+                    document.getElementById('snap').play();
+                    // Calculate the paddle hit position relative to its height (0 at the top, 1 at the bottom)
+                    const relativeIntersectY = (ball.y - leftPaddle.y) / paddleHeight;
+
+                    // Calculate the bounce angle based on the relative hit position and paddle direction
+                    const bounceAngle = (relativeIntersectY - 0.5) * Math.PI / 2;
+
+                    // Adjust the ball's direction based on the paddle's movement direction
+                    ball.dx = Math.abs(ball.dx);
+                    ball.dy = Math.abs(ball.dy) * Math.cos(bounceAngle) * (leftPaddle.dy < 0 ? -1 : 1);
+                    return;
+                }
+                // Bounce off right
+                if (
+                    ball.x + ballSize + 1 >= rightPaddle.x - paddleWidth &&
+                    ball.y >= rightPaddle.y - 1 &&
+                    ball.y <= rightPaddle.y + 1 + paddleHeight
+                ) {
+                    document.getElementById('snap').play();
+                    // Calculate the paddle hit position relative to its height (0 at the top, 1 at the bottom)
+                    const relativeIntersectY = (ball.y - rightPaddle.y) / paddleHeight;
+                    // Calculate the bounce angle based on the relative hit position and paddle direction
+                    const bounceAngle = (relativeIntersectY - 0.5) * Math.PI / 2;
+                    // Adjust the ball's direction based on the paddle's movement direction
+                    ball.dx = -Math.abs(ball.dx);
+                    ball.dy = Math.abs(ball.dy) * Math.cos(bounceAngle) * (rightPaddle.dy < 0 ? -1 : 1);
+                    return;
+                }
+                // Bounce off bottom
+                if (
+                    ball.y + ballSize + 1 >= bottomPaddle.y - (bottomPaddle.high * 2) &&
+                    ball.x >= bottomPaddle.x - (bottomPaddle.wide) &&
+                    ball.x <= bottomPaddle.x + (bottomPaddle.wide)) {
+                    document.getElementById('snap').play();
+                    ball.dy = 0 - ball.dy;
+                    return;
+                }
+                // Bounce off top
+                if (
+                    ball.y - ballSize - 1 <= topPaddle.y + (topPaddle.high * 2) &&
+                    ball.x >= topPaddle.x - (topPaddle.wide) &&
+                    ball.x <= topPaddle.x + (topPaddle.wide)
+                ) {
+                    document.getElementById('snap').play();
+                    ball.dy = Math.abs(ball.dy);
+                    return;
+                }
+                // Score top
+                if (ball.y - ballSize + 1 <= topPaddle.y - 1 - (topPaddle.high / 2)) {
+                    document.getElementById('popmp3').play();
+                    scoreRight++; // Increment bottom player score
+                    updateScoreDisplay();
+                    scoreHistory.push('rightPlayer')
+                    powerUp.drawn = false;
+                    resetBall();
+                }
+                // Score bottom
+                if (ball.y + ballSize - 1 >= canvas.height) {
+                    document.getElementById('popmp3').play();
+                    scoreLeft++; // Increment top player score
+                    updateScoreDisplay();
+                    scoreHistory.push('leftPlayer')
+                    powerUp.drawn = false;
+                    resetBall();
+                }
+                // Check for scoring
+                if (ball.x - ballSize + 1 <= leftPaddle.x - 1 - (paddleWidth / 2)) {
+                    // Right player scores
+                    document.getElementById('popmp3').play();
+                    scoreRight++;
+                    updateScoreDisplay();
+                    scoreHistory.push('rightPlayer')
+                    powerUp.drawn = false;
+                    resetBall();
+                }
+                if (ball.x + ballSize - 1 >= rightPaddle.x + 1 + (paddleWidth / 2)) {
+                    document.getElementById('popmp3').play();
+                    // Left player scores
+                    scoreLeft++;
+                    updateScoreDisplay();
+                    scoreHistory.push('leftPlayer')
+                    powerUp.drawn = false;
+                    resetBall();
+                }
+                checkWinCondition(winConSelect.value);
+            };
+            /**
+             * returns a psuedo-random number, either -1 or +1.
+             * useful to randomly invert a number via multiplication.
+             * (amid any other concievable application of the result).
+             * @returns
+             */
+            function randomupdown() {
+                return (Math.random()) >= 0.5 ? 1 : -1;
+            };
+            // Reset ball position
+            function resetBall() {
+                //reset paddles dimensions to default size scaled to canvas size
+                paddleHeight = canvas.width / 6;
+                paddleWidth = (canvas.height * 2) / paddleHeight;
+                // clear canvas and redraw paddles and ball
+                clearCanvas();
+                drawPaddle(leftPaddle.x, leftPaddle.y);
+                drawPaddle(rightPaddle.x, rightPaddle.y);
+                drawTopBottomPaddles();
+                drawBall();
+                //update ball position
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                //stop ball from moving
+                ball.dx = 0;
+                ball.dy = 0;
+                //start moving ball when spacebar pressed
+            };
+            document.addEventListener("keyup", function (event) {
+                if (event.key == ' ') {
+                    //move ball at default speed as set by user inpit since being reset
+                    const dx = (canvas.width / ogBallSize) / Math.ceil(Math.sqrt(parseInt(ballSpeedInput.value)));
+                    ballSpeed = dx;
+                    //get random direction left or right
+                    ball.dx = dx * randomupdown();
+                    //get random angle up down
+                    ball.dy = (Math.random() * (dx / 2)) * randomupdown();
+                    ballSize = ogBallSize; // Reset ball size unconditionally
+                    //reset ball color to white
+                    ball.fill = ball.mod ? ball.fill : 'white';
+                    //adjust oaddle speeds to default in relation to ball speed
+                    paddleSpeed = ballSpeed * 1.25;
+                    //generate a powerUp object
+                    powerUp.active = false;
+                    powerUp.drawn = false;
+                    generatePowerUp();
+                }
+            });
+            // Update score display
+            function updateScoreDisplay() {
+                scoreLeftDisplay.textContent = scoreLeft;
+                scoreRightDisplay.textContent = scoreRight;
+                const scoreLeftElement = document.getElementById("scoreLeft");
+                const scoreRightElement = document.getElementById("scoreRight");
+                const numericScoreLeft = parseInt(scoreLeftDisplay.textContent);
+                const numericScoreRight = parseInt(scoreRightDisplay.textContent);
+                // Display scores
+                scoreLeftElement.style.backgroundColor = (numericScoreLeft > numericScoreRight) ? "green" : (numericScoreLeft < numericScoreRight) ? "red" : "yellow";
+                scoreRightElement.style.backgroundColor = (numericScoreLeft < numericScoreRight) ? "green" : (numericScoreLeft > numericScoreRight) ? "red" : "yellow";
+            };
+            // Draw everything
+            function draw() {
+                clearCanvas();
+                // Draw paddles
+                drawPaddle(leftPaddle.x, leftPaddle.y);
+                drawPaddle(rightPaddle.x, rightPaddle.y);
+                updateTopBottomPaddles();
+                drawTopBottomPaddles();
+                // Draw ball
+                drawBall(ball.x, ball.y);
+                drawPowerUp();
+            };
+
+            let keyA = false, keyW = false, keyS = false, keyD = false, upArrow = false, downArrow = false, leftArrow = false, rightArrow = false;
+            let keystates = [keyA, keyW, keyS, keyD, upArrow, downArrow, leftArrow, rightArrow]
+            let keynames = ['a', 'w', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
+            // Handle keyboard input
+            document.addEventListener("keydown", function (event) {
+                keystates[keynames.indexOf(event.key)] = true;
+                keyIsDown(event.key);
+                //while (keystates[keynames.indexOf(pressedKey)]) {
+                //    keyIsDown(pressedKey);
+                //};
+            });
+
+            /**
+             * The 'Key<key>' variables work with the 'keystates[]' and 'keynames[]' arrays within the 'keydown' and 'keyup' event listeners for seamless alternati         * 
+            on betw             * 
+                 * een key presses
+               *       *  - most notably the handling of conflicting keys and the switch between them in order of action.
+             *  - this eliminates the need for repeated/subequent key presses to resume actions interuppted by conflicting keys whilst the initial key remains pressed.
+             *
+             * @param {string} pressedKey
+             */
+            function keyIsDown(pressedKey) {
+                switch (pressedKey) {
+                    case "w":
+                        leftPaddle.dy = -paddleSpeed; // Move left paddle up
+                        keyW = true;
+                        break;
+                    case "s":
+                        leftPaddle.dy = paddleSpeed; // Move left paddle up
+                        keyS = true;
+                        break;
+                    case "ArrowUp":
+                        rightPaddle.dy = -paddleSpeed; // Move right paddle up
+                        upArrow = true;
+                        break;
+                    case "ArrowDown":
+                        rightPaddle.dy = paddleSpeed; // Move right paddle down
+                        downArrow = true;
+                        break;
+                    case "a":
+                        topPaddle.dx = -(paddleSpeed * 1.25); // Move top paddle left
+                        keyA = true;
+                        break;
+                    case "d":
+                        topPaddle.dx = paddleSpeed * 1.25; // Move top paddle right
+                        keyD = true;
+                        break;
+                    case "ArrowLeft":
+                        bottomPaddle.dx = -(paddleSpeed * 1.25); // Move bottom paddle left
+                        leftArrow = true;
+                        break;
+                    case "ArrowRight":
+                        bottomPaddle.dx = paddleSpeed * 1.25; // Move bottom paddle right
+                        rightArrow = true;
+                        break;
+                }
+
+            };
+
+            document.addEventListener("keyup", function (event) {
+                switch (event.key) {
+                    case "w":
+                        keyW = false;
+                        leftPaddle.dy = 0; // Stop left paddle movement
+                        if (keyS) keyIsDown('s');
+                        break;
+                    case "s":
+                        keyS = false;
+                        leftPaddle.dy = 0; // Stop left paddle movement
+                        if (keyW) keyIsDown('w');
+                        break;
+                    case "ArrowUp":
+                        upArrow = false;
+                        rightPaddle.dy = 0; // Stop right paddle movement
+                        if (downArrow) keyIsDown('ArrowDown');
+                        break;
+                    case "ArrowDown":
+                        downArrow = false;
+                        rightPaddle.dy = 0; // Stop right paddle movement
+                        if (upArrow) keyIsDown('ArrowUp');
+                        break;
+                    case "a":
+                        keyA = false;
+                        topPaddle.dx = 0; // Stop top paddle movement
+                        if (keyD) keyIsDown('d');
+                        break;
+                    case "d":
+                        keyD = false;
+                        topPaddle.dx = 0; // Stop top paddle movement
+                        if (keyA) keyIsDown('a');
+                        break;
+                    case "ArrowLeft":
+                        leftArrow = false;
+                        bottomPaddle.dx = 0; // Stop bottom paddle movement
+                        if (rightArrow) keyIsDown('ArrowRight');
+                        break;
+                    case "ArrowRight":
+                        rightArrow = false;
+                        bottomPaddle.dx = 0; // Stop bottom paddle movement
+                        if (leftArrow) keyIsDown('ArrowLeft');
+                        break;
+                }
+                keystates[keynames.indexOf(event.key)] = false;
+
+            });
+
+            let aiSpeed = paddleSpeed * (1.09 - (0.1 + Math.random()));
+            // AI logic for controlling left and top paddles
+            function controlAI() {
+                aiPaddleSpeed = aiSpeed * (1 - ((Math.random() * 0.9) + 0.1));
+                // Control left paddle
+                if (ball.y < leftPaddle.y + paddleHeight / 2) {
+                    // If ball is above the middle of the left paddle, move up
+                    leftPaddle.dy = -aiSpeed;
+                } else {
+                    // If ball is below the middle of the left paddle, move down
+                    leftPaddle.dy = aiSpeed;
+                }
+
+                // Control top paddle
+                if (ball.x < topPaddle.x + topPaddle.wide / 2) {
+                    // If ball is to the left of the middle of the top paddle, move left
+                    topPaddle.dx = -aiSpeed;
+                } else {
+                    // If ball is to the right of the middle of the top paddle, move right
+                    topPaddle.dx = aiSpeed;
+                }
+            };
+
+            function gameLoop() {
+                update();
+                if (vsAI) {
+                    controlAI();
+                }
+                draw();
+                checkPowerUpCollision();
+                requestAnimationFrame(gameLoop);
+            };
+            gameLoop();
+        };
     </script>
-
-
 </body>
 </html>
