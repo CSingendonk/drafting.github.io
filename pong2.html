@@ -1,7 +1,6 @@
 <!DOCTYPE-html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.75">
     <title>Super Pong</title>
     <style>
@@ -30,7 +29,7 @@
 </head>
 <body>
     <label id="winNumLabel" for="winNumberInput" style="margin: 0 auto 0 auto; font-size:2rem; font-weight:400; display:none; justify-content:center; justify-self:center;"></label>
-    <canvas id="canvas" height="420" width="840"></canvas>
+    <canvas id="canvas" height="420" width="840"> </canvas>
     <div style="
     display: flex;
     margin: auto;
@@ -43,6 +42,7 @@
     background-color: #111111ff;
 ">
         <label for="ballSpeed" style="
+    color:paleturquoise;
     margin-inline: 50px;
     font-size: 1rem;
     font-weight: 600;
@@ -79,6 +79,10 @@
         <span id="scoreRight" style="border: 1px black solid;background-color: green;padding-inline: 10px;">0</span>
     </div>
     <div style="display:inline-flex;">
+        <label for="aiCheckbox" style="margin-right: 2vw; border: 5px solid black; font-size: 2rem;">
+            AI
+            <input type="checkbox" id="aiCheckbox" checked onchange="toggleAI()" style="border: 5px solid black; border-right: 0px none white;" />
+        </label>
         <label for="gameModeSelect">Play Style =</label>
         <select id="gameModeSelect" style="width: 30vw; height: 2.5rem; margin: 0 auto; text-align:center; font-size: 2rem; font-weight: 300;">
             <option inert value="default">Select Style</option>
@@ -130,7 +134,7 @@
             const gameModeSelect = document.getElementById("gameModeSelect");
             const subConNumLabel = document.getElementById("winNumLabel");
             const winConSelect = document.getElementById("winConditionSelect");
-            let gameOver = false, gameMode = 'default', powerupsEnabled = true, paddleHeight = canvas.width / 6, paddleWidth = (canvas.height * 2) / paddleHeight, ballSpeed = 5, paddleSpeed = 7.5, paddleFill = 'white', ballSize = canvas.width / (paddleWidth * ballSpeed) / 2, scoreLeft = 0, scoreRight = 0;
+            let gameStarted = false; gameOver = false, gameMode = 'default', powerupsEnabled = true, paddleHeight = canvas.width / 6, paddleWidth = (canvas.height * 2) / paddleHeight, ballSpeed = 3, paddleSpeed = 7.5, paddleFill = 'white', ballSize = canvas.width / (paddleWidth * ballSpeed) / 2, scoreLeft = 0, scoreRight = 0;
             let scoreHistory = [];
             let tbPaddleHeight = paddleHeight, tbPaddleWidth = paddleWidth, tbPaddleFill;
             let leftPaddle = {
@@ -420,10 +424,44 @@
             /**
              * Returns the string-type name of the colour related to the 'type' name string of the power-up passed in.
              * @param {string} pwrType
-             * @returns {'colour name'}
+             * @returns {string}
              */
             function getActivePowerUpColour(pwrType) {
                 return pwrType === 'speedUp' ? "green" : (pwrType == '' ? 'white' : (pwrType === 'speedDown' ? "red" : (pwrType === 'ballBig' ? "cyan" : (pwrType === 'ballSmall' ? "orange" : pwrType === 'paddleShort' ? 'pink' : (pwrType === 'paddleTall' ? 'yellow' : 'white')))));
+            };
+
+            function drawArrow(context, x, y, width, height, color, angleInDegrees) {
+                // Save the current transformation matrix
+                context.save();
+                // Rotate the canvas to the specified angle
+                context.rotate(angleInDegrees);
+
+                // Set arrow color
+                context.fillStyle = color;
+                context.strokeStyle = color;
+
+                // Draw arrow triangle
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x + width / 2, y + height);
+                context.lineTo(x + width, y);
+                context.closePath();
+                context.fill();
+
+                // Draw arrow line
+                context.beginPath();
+                context.lineWidth = width / 3;
+                context.moveTo(x + (width / 2), y + (height / 4));
+                context.lineTo(x + (width / 2), y - height);
+                context.stroke();
+
+
+
+                context.translate((Math.random() * x) * randomupdown(), (Math.random() * y) * randomupdown());
+
+
+                // Restore the previous transformation matrix
+                context.restore();
             };
 
             /**
@@ -433,6 +471,8 @@
             function drawPowerUp() {
                 if (powerUp.active && powerupsEnabled) {
                     pwrup.fillStyle = getActivePowerUpColour(powerUp.type);
+                    let udpu = powerUp.type.includes('Up') || powerUp.type.includes('Big') || powerUp.type.includes('Tall') ? 180 : 0;
+                    drawArrow(pwrup, powerUp.x, powerUp.y, powerUp.width, powerUp.height, getActivePowerUpColour(powerUp.type), udpu);
                     pwrup.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
                     powerUp.drawn = true;
                 }
@@ -463,7 +503,7 @@
                     ball.fill = 'white';
                     ball.mod = '';
                     ballSize = ogBallSize;
-                    ballSpeed = (canvas.width / ogBallSize) / Math.ceil(Math.sqrt(parseInt(ballSpeedInput.value)));
+                    ballSpeed = ((parseInt(ballSpeedInput.value)));
                     // Implement desired effects based on power-up type
                     switch (powerUp.type) {
                         case 'speedUp':
@@ -522,7 +562,7 @@
                     const types = ['speedUp', 'speedDown', 'ballBig', 'ballSmall', 'paddleShort', 'paddleTall']; // Add more types as needed
                     powerUp.type = types[Math.floor(Math.random() * types.length)];
                     // Interval for cycling through power-up types
-                    const interval = (Math.random() * 5000) + 1;
+                    const interval = (Math.random() * 500) * 10;
                     // Cycle through power-up types until collision with ball
                     const cycleInterval = setTimeout(() => {
                         powerUp.type = types[Math.floor(Math.random() * types.length)];
@@ -709,8 +749,14 @@
             };
             document.addEventListener("keyup", function (event) {
                 if (event.key == ' ') {
+                    if (gameStarted) {
+                        clearCanvas();
+                        gameLoop();
+                        gameStarted = false;
+                        return;
+                    }
                     //move ball at default speed as set by user inpit since being reset
-                    const dx = (canvas.width / ogBallSize) / Math.ceil(Math.sqrt(parseInt(ballSpeedInput.value)));
+                    const dx = parseInt(ballSpeedInput.value);
                     ballSpeed = dx;
                     //get random direction left or right
                     ball.dx = dx * randomupdown();
@@ -752,25 +798,31 @@
                 drawPowerUp();
             };
 
+            let keystates = [false, false, false, false, false, false, false, false];
             let keyA = false, keyW = false, keyS = false, keyD = false, upArrow = false, downArrow = false, leftArrow = false, rightArrow = false;
-            let keystates = [keyA, keyW, keyS, keyD, upArrow, downArrow, leftArrow, rightArrow]
+            //let keystates = [keyA = false, keyW = false, keyS = false, keyD = false, upArrow = false, downArrow = false, leftArrow = false, rightArrow = false];
+            //let keystate = [keyA, keyW, keyS, keyD, upArrow, downArrow, leftArrow, rightArrow]
             let keynames = ['a', 'w', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
             // Handle keyboard input
             document.addEventListener("keydown", function (event) {
-                keystates[keynames.indexOf(event.key)] = true;
-                keyIsDown(event.key);
-                //while (keystates[keynames.indexOf(pressedKey)]) {
-                //    keyIsDown(pressedKey);
-                //};
+                let nameof = keynames.indexOf(event.key);
+                if (nameof == false || nameof > keynames.length || nameof == -1) {
+                    return;
+                }
+                else {
+                    keystates[nameof] = true;
+                    keyIsDown(event.key);
+                    //if (keystates[keynames.indexOf(event.key)]) {
+                    //    keyIsDown(event.key);
+                    //};
+                }
             });
 
             /**
-             * The 'Key<key>' variables work with the 'keystates[]' and 'keynames[]' arrays within the 'keydown' and 'keyup' event listeners for seamless alternati         * 
-            on betw             * 
-                 * een key presses
-               *       *  - most notably the handling of conflicting keys and the switch between them in order of action.
-             *  - this eliminates the need for repeated/subequent key presses to resume actions interuppted by conflicting keys whilst the initial key remains pressed.
+             * The 'Key<key>' variables work with the 'keystates[]' and 'keynames[]' arrays within the 'keydown' and 'keyup' event listeners for seamless alternation between key presses
+             * - most notably the handling of conflicting keys and the switch between them in order of action.
+             *  - this eliminates the need for repeated/subequent key presses to resume/reverse actions interuppted by conflicting key-presses whilst the initial key remains pressed.
              *
              * @param {string} pressedKey
              */
@@ -807,6 +859,8 @@
                     case "ArrowRight":
                         bottomPaddle.dx = paddleSpeed * 1.25; // Move bottom paddle right
                         rightArrow = true;
+                        break;
+                    default:
                         break;
                 }
 
@@ -859,7 +913,7 @@
 
             });
 
-            let aiSpeed = paddleSpeed * (1.09 - (0.1 + Math.random()));
+            let aiSpeed = paddleSpeed * (0.1 + (Math.random() * 0.8));
             // AI logic for controlling left and top paddles
             function controlAI() {
                 aiPaddleSpeed = aiSpeed * (1 - ((Math.random() * 0.9) + 0.1));
@@ -882,16 +936,152 @@
                 }
             };
 
+            const aiToggleInput = document.getElementById('aiCheckbox');
+            function toggleAI() {
+                vsAI = vsAI ? false : true;
+                if (!vsAI) {
+                    topPaddle.dx = 0;
+                    leftPaddle.dy = 0;
+                }
+            };
+
             function gameLoop() {
-                update();
                 if (vsAI) {
                     controlAI();
                 }
                 draw();
                 checkPowerUpCollision();
+                ballSpeed = 5;
+                ballSpeed = ball.mod === 'speedUp' ? 3 * 1.2 : (ball.mod === 'speedDown' ? 3 * 0.8 : 5);
+                update();
                 requestAnimationFrame(gameLoop);
             };
-            gameLoop();
+
+            function nextLetterWithSound(ctxt, introText, index, indentX, x, y) {
+                // Draw the letter
+                const gradient = ctx.createRadialGradient(indentX - x, y - 12, 48, canvas.width - indentX, y - 12, 48);
+                // Add three color stops
+                gradient.addColorStop(0.1, "#00000090");
+                gradient.addColorStop(0.2, "pink");
+                gradient.addColorStop(0.5, "#a99aa99a");
+                gradient.addColorStop(0.9, "green");
+                ctxt.font = "48px Arial";
+                ctxt.fillStyle = gradient;
+                if (index >= introText.length - 1) {
+
+                    ctxt.fillStyle = gradient;
+                    ctxt.strokeStyle = gradient;
+                    ctxt.lineWidth = 24;
+                    document.getElementById('popmp3').play();
+                    ctxt.beginPath();
+                    ctxt.moveTo(indentX - x, y + 25);
+                    ctxt.lineTo(indentX + (x * introText.length), y + 25);
+                    ctxt.stroke();
+                } else {
+                    if (introText.charAt(index) == ' ') {
+                        ctxt.fillText(introText.charAt(index), indentX + (x * index), y);
+                        document.getElementById('bounce').play();
+                        nextLetterWithSound(ctxt, introText, index + 1, indentX, x, y);
+                    }
+                    if (index % 2 == 0) {
+                        document.getElementById('bounce').play();
+                    } else {
+                        document.getElementById('snap').play();
+                    }
+                }
+                ctxt.fillText(introText.charAt(index), indentX + (x * index), y);
+                index++;
+            };
+
+            // Intro Animation
+            function introAnimation() {
+                let ctxt = canvas.getContext('2d');
+                let infoText = "Press 'SPACEBAR' to Continue";
+                const powerupsText = ["_fast-ball_", "slow-ball_", "big-ball_", "little-ball_", 'long-paddles_', "short-paddles_"];
+                const powerupColors = ['green', 'red', 'cyan', 'orange', 'yellow', 'pink']
+                let introText = "SUPER PONG";
+                let x = 48;
+                x += (canvas.width / (introText.length)) / 48;
+                let indentX = (canvas.width / x) * introText.length;
+                let xx = canvas.width / infoText.length;
+                let xxx = canvas.width / powerupsText.length;
+                let y = canvas.height / 2;
+                let index = 0;
+                for (let k = 0; k < 1; k++) {
+                    setTimeout(() => { }, 500);
+                    ctxt.font = "24px Arial";
+                    ctxt.fillStyle = 'white';
+                    ctxt.textAlign = 'center';
+                    ctxt.fillText(infoText, canvas.width / 2, y + (y / 2));
+                };
+                for (let i = 0; i < powerupsText.length; i++) {
+                    let xxxx = xxx / powerupsText[i].length;
+                    for (let j = 0; j < powerupsText[i].length; j++) {
+                        setTimeout(() => {
+                            ctxt.font = "12px Arial";
+                            ctxt.fillStyle = powerupColors[i];
+                            ctxt.fillText(powerupsText[i].charAt(j), (xxx * i) + (xxxx * j) + 1, y - (y / 2));
+                        }, 1500);
+                    };
+                };
+                let interval = setInterval(() => {
+                    if (index > introText.length) {
+                        clearInterval(interval);
+                        gameStarted = true;
+                        return;
+                    }
+                    nextLetterWithSound(ctxt, introText, index, indentX, x, y);
+                    index++;
+                }, 250);
+            };
+
+            window.onload = introAnimation();
+        };
+        {
+            function celsiusToFahrenheit(degreesC) {
+                return (degreesC * (9 / 5)) + 32;
+            };
+
+            function decimalToHex(decimalValue) {
+                const clampedValue = Math.max(0, Math.min(decimalValue, 255));
+                const quotient = Math.floor(clampedValue / 16);
+                const remainder = clampedValue % 16;
+                const hexQuotient = toHexDigit(quotient);
+                const hexRemainder = toHexDigit(remainder);
+                return hexQuotient + hexRemainder;
+            };
+
+            function toHexDigit(decimal) {
+                // Define an array of hexadecimal digits
+                const hexDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+                // Return the corresponding hexadecimal digit for the decimal value
+                return hexDigits[decimal];
+            };
+
+            function colourWeightsToHex(weight) {
+                return decimalToHex(weight);
+            };
+
+            function generateBRColor(value) {
+                // Calculate red value based on distance from 212
+                const red = Math.round(255 * Math.min(Math.abs(value - 212) / 180, 1)); // 180 is the maximum distance between 212 and 32
+
+                // Calculate blue value based on distance from -212
+                const blue = Math.round(255 * Math.min(Math.abs(value + 212) / 244, 1)); // 244 is the maximum distance between -212 and 32
+
+                // Green value set to 0
+                const green = 0;
+
+                // Convert RGB values to hexadecimal
+                const redHex = red.toString(16).padStart(2, '0');
+                const greenHex = green.toString(16).padStart(2, '0');
+                const blueHex = blue.toString(16).padStart(2, '0');
+
+                // Construct RGBA hex color code
+                const rgbaHex = `#${redHex}${greenHex}${blueHex}`;
+
+                return rgbaHex;
+            }
         };
     </script>
 </body>
