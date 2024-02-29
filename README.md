@@ -1,4 +1,6 @@
 # drafting.github.io
+#super pong
+- 2 or 4 paddle play choice, vs ai choice, win conditions / game mode selections and implimentations added, power ups refined, score keeping refined, left and top paddles move with wasd right and bottom paddles move with up dowmn left right arrows, spacebar launches ball after a point is scored or a new game is started. ballspeed input element controls speed of the ball, just to be clear? XD 
 
 mazepage - customizable randomized regenerating maze - arrow keys / ui
 
