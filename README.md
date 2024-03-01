@@ -7,15 +7,18 @@ PANIC</h1>
 mazepage - customizable randomized regenerating maze - arrow keys / ui
 
 pong game - pong v2 works best - arrows up/down = right paddle + 'W'/'S' = left paddle -- changing speed launches ball horizontally in opposite direction of most recent side that was scored against ( im pretty sure iirc i dunno )
+-- note: upon further investigation and actually testing the pong games, might be good for like a sunday afternoon 'make it work' kinda thing. Super Pong however is more like a ' oooo, maybe  I will add this, or will that just break it?' kinda thing.
 
-repo c# files - most important == playerscript , movement , mazegenerator , rotatecontroller , hotkeyhandlers , exittrigger 
+repo c# files - ones i actually use for stupid shit => playerscript , movement , mazegenerator , rotatecontroller , hotkeyhandlers , exittrigger 
 
-<quote>
-<br/>
-Think of how stupid the average person is, and then realize, half of ‘em are stupider than that.
-<br/>                                                                                                    
+<cite>
+Think of how stupid the average person is, and then realize, half of ‘em are stupider than that..
+<br />
 I would imagine if you could understand morse code, a tap dancer would drive you crazy.
-</quote>
-<h4>
-|---> Mitch Hedberg
-</h4>
+</cite>
+<h6>--Mitch Hedberg</h6>
+<cite style="color:BurlyWood; font-size:1.5rem;">
+How much wood would a Woodchuck chuck, if a Woodchuck could chuck wood? 
+<br /> 
+A Woodchuck would chuck as much wood as a Woodchuck could chuck, if a Woodchuck could chuck wood...
+</cite>
