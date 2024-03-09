@@ -5,6 +5,12 @@ if (!document.getElementById("hellofrom")){
     hey.textContent = "Hey There!";
     document.getElementsByTagName("body")[0].appendChild(hey);
 }
+
+function helloButtonClick() {
+    isTalkingShit = false;
+    speakWithAllVoices();
+}
+
 function speakWithAllVoices() {
 
   if(!isTalkingShit) {
