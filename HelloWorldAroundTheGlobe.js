@@ -1,5 +1,10 @@
 let isTalkingShit = false;
-
+  if (!document.getElementById("hellofrom")){
+    let hey = document.createElement('h1');
+    hey.id = "hellofrom";
+    hey.textContent = "Hey There!";
+    document.getElementsByTagName("body")[0].appendChild(hey);
+  }
 function loadedthepage(){
   if (!document.getElementById("hellofrom")){
     let hey = document.createElement('h1');
