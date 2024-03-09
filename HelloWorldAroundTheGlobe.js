@@ -8,7 +8,9 @@ function loadedthepage(){
     okay.style.width = '250';
     okay.style.fontSize = '3rem';
     document.getElementsByTagName("body")[0].appendChild(okay);
-  speakWithAllVoices();
+    okay.addEventListener("click", function() {
+    speakWithAllVoices();
+    });
 };
 
 if (!document.getElementById('hellofrombutton')){
@@ -19,6 +21,9 @@ if (!document.getElementById('hellofrombutton')){
     okay.style.width = '250';
     okay.style.fontSize = '3rem';
     document.getElementsByTagName("body")[0].appendChild(okay);
+    okay.addEventListener("click", function() {
+    speakWithAllVoices();
+    });
 }
 
 function speakWithAllVoices() {
