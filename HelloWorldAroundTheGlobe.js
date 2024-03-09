@@ -1,27 +1,29 @@
 let isTalkingShit = false;
-if (!document.getElementById("hellofrom")){
+let whoseVoice = 'Silence - Silent';
+
+function addHelloText() {
+  if (!document.getElementById("hellofrom")) {
     let hey = document.createElement('h1');
     hey.id = "hellofrom";
     hey.textContent = "Hey There!";
     document.getElementsByTagName("body")[0].appendChild(hey);
-}
-
-function helloButtonClick() {
-    isTalkingShit = false;
-    speakWithAllVoices();
-}
+  }
+  else {
+    document.getElementById("hellofrom").textContent = "Ahoi!";
+  }
+};
 
 function speakWithAllVoices() {
-
-  if(!isTalkingShit) {
+  if (!isTalkingShit) {
     let utteranceText = 'Hello, world!'; // Text to be spoken
     let voices = window.speechSynthesis.getVoices();
 
     voices.forEach(voice => {
+      whoseVoice = voice.name;
       let ssu = new SpeechSynthesisUtterance(utteranceText);
       ssu.voice = voice; // Set the voice to the current voice in the loop
       ssu.lang = voice.lang; // Set the language code
-      ssu.onend = function(event) {
+      ssu.onend = function (event) {
         document.title = voice.name;
         console.log('Speech finished for voice:', voice.name);
         document.getElementById("hellofrom").textContent = ('Speaking with voice:', voice.name);
@@ -33,11 +35,21 @@ function speakWithAllVoices() {
       isTalkingShit = true;
     });
   }
-}
+};
 
 // It's important to call this function after the 'voiceschanged' event fires
 // to ensure all voices are loaded, especially on some browsers.
-window.speechSynthesis.onvoiceschanged = function() {
+window.speechSynthesis.onvoiceschanged = function () {
+  addHelloText();
+  if (isTalkingShit) {
+    document.getElementById("hellofrom").textContent = ('Speaking with voice: ' + whoseVoice);
+    console.log('Speaking in voice: ' + whoseVoice);
+  } else { isTalkingShit = false; };
   speakWithAllVoices();
 };
 
+function helloButtonClick() {
+  addHelloText();
+  isTalkingShit = false;
+  speakWithAllVoices();
+};
