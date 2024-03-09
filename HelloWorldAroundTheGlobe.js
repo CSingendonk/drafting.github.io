@@ -1,21 +1,21 @@
 let isTalkingShit = false;
-  if (!document.getElementById("hellofrom")){
-    let hey = document.createElement('h1');
-    hey.id = "hellofrom";
-    hey.textContent = "Hey There!";
-    document.getElementsByTagName("body")[0].appendChild(hey);
-  }
+
 function loadedthepage(){
-  if (!document.getElementById("hellofrom")){
-    let hey = document.createElement('h1');
-    hey.id = "hellofrom";
-    hey.textContent = "Hey There!";
-    document.getElementsByTagName("body")[0].appendChild(hey);
-  }
+    let okay = document.createElement('button');
+    okay.id = "hellofrombutton";
+    okay.textContent = "Hey There! Click Me!";
+    okay.onclick = speakWithAllVoices();
+    document.getElementsByTagName("body")[0].appendChild(okay);
   speakWithAllVoices();
 };
 
 function speakWithAllVoices() {
+    if (!document.getElementById("hellofrom")){
+    let hey = document.createElement('h1');
+    hey.id = "hellofrom";
+    hey.textContent = "Hey There!";
+    document.getElementsByTagName("body")[0].appendChild(hey);
+  }
   if(!isTalkingShit) {
     const utteranceText = 'Hello, world!'; // Text to be spoken
     const voices = window.speechSynthesis.getVoices();
