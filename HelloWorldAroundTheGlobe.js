@@ -1,31 +1,5 @@
 let isTalkingShit = false;
 
-function loadedthepage(){
-    let okay = document.createElement('button');
-    okay.id = "hellofrombutton";
-    okay.textContent = "Hey There! Click Me!";
-    okay.onclick = speakWithAllVoices();
-    okay.style.width = '250';
-    okay.style.fontSize = '3rem';
-    document.getElementsByTagName("body")[0].appendChild(okay);
-    okay.addEventListener("click", function() {
-    speakWithAllVoices();
-    });
-};
-
-if (!document.getElementById('hellofrombutton')){
-    let okay = document.createElement('button');
-    okay.id = "hellofrombutton";
-    okay.textContent = "Hey There! Click Me!";
-    okay.onclick = speakWithAllVoices();
-    okay.style.width = '250';
-    okay.style.fontSize = '3rem';
-    document.getElementsByTagName("body")[0].appendChild(okay);
-    okay.addEventListener("click", function() {
-    speakWithAllVoices();
-    });
-}
-
 function speakWithAllVoices() {
     if (!document.getElementById("hellofrom")){
     let hey = document.createElement('h1');
@@ -59,8 +33,5 @@ function speakWithAllVoices() {
 // to ensure all voices are loaded, especially on some browsers.
 window.speechSynthesis.onvoiceschanged = function() {
   speakWithAllVoices();
-};
-window.onload = (event) => {
-  loadedthepage();
 };
 
