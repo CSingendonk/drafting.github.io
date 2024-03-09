@@ -31,9 +31,6 @@ function speakWithAllVoices() {
       isTalkingShit = true;
     });
   }
-  else {
-    speakWithAllVoices();
-  }
 }
 
 // It's important to call this function after the 'voiceschanged' event fires
@@ -41,7 +38,6 @@ function speakWithAllVoices() {
 window.speechSynthesis.onvoiceschanged = function() {
   speakWithAllVoices();
 };
-
 window.onload = (event) => {
   loadedthepage();
 };
