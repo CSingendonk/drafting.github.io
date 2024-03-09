@@ -1,18 +1,18 @@
 let isTalkingShit = false;
-
-function speakWithAllVoices() {
-    if (!document.getElementById("hellofrom")){
+if (!document.getElementById("hellofrom")){
     let hey = document.createElement('h1');
     hey.id = "hellofrom";
     hey.textContent = "Hey There!";
     document.getElementsByTagName("body")[0].appendChild(hey);
-  }
+}
+function speakWithAllVoices() {
+
   if(!isTalkingShit) {
-    const utteranceText = 'Hello, world!'; // Text to be spoken
-    const voices = window.speechSynthesis.getVoices();
+    let utteranceText = 'Hello, world!'; // Text to be spoken
+    let voices = window.speechSynthesis.getVoices();
 
     voices.forEach(voice => {
-      const ssu = new SpeechSynthesisUtterance(utteranceText);
+      let ssu = new SpeechSynthesisUtterance(utteranceText);
       ssu.voice = voice; // Set the voice to the current voice in the loop
       ssu.lang = voice.lang; // Set the language code
       ssu.onend = function(event) {
