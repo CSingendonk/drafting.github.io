@@ -11,6 +11,16 @@ function loadedthepage(){
   speakWithAllVoices();
 };
 
+if (!document.getElementById('hellofrombutton')){
+    let okay = document.createElement('button');
+    okay.id = "hellofrombutton";
+    okay.textContent = "Hey There! Click Me!";
+    okay.onclick = speakWithAllVoices();
+    okay.style.width = '250';
+    okay.style.fontSize = '3rem';
+    document.getElementsByTagName("body")[0].appendChild(okay);
+}
+
 function speakWithAllVoices() {
     if (!document.getElementById("hellofrom")){
     let hey = document.createElement('h1');
