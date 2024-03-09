@@ -39,7 +39,8 @@
         <p><sup>(actually works as intended)</sup></p>
       </nav>
     </header>
-    <script>let isTalkingShit = false;
+    <script>
+      let isTalkingShit = false;
 
 if (!document.getElementById("hellofrom")){
   let hey = document.createElement('h1');
@@ -67,7 +68,7 @@ function speakWithAllVoices() {
       const ssunumbertwo = new SpeechSynthesisUtterance(utteranceText);
       console.log('Speaking in voice:', voice.name);
       window.speechSynthesis.speak(ssunumbertwo);
-      isTalkingShit = true;
+      isTalkingShit = false;
     });
   }
   else {
