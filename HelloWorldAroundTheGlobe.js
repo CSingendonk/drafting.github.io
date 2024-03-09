@@ -5,6 +5,8 @@ function loadedthepage(){
     okay.id = "hellofrombutton";
     okay.textContent = "Hey There! Click Me!";
     okay.onclick = speakWithAllVoices();
+    okay.style.width = '250';
+    okay.style.fontSize = '3rem';
     document.getElementsByTagName("body")[0].appendChild(okay);
   speakWithAllVoices();
 };
