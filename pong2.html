@@ -10,25 +10,102 @@
             border: 1px solid blue;
             display: block;
             margin: auto;
+            margin-right: 0.5vmin;
             width: 95vw;
             height: 80vh;
         }
 
-        scoreLeft
+        #scoreLeft
         {
-            display: inline;
-            margin-left: 25%;
+            display: flex;
+            position: absolute;
+            float:left;
+            clear: none;
+            top: 1%; 
+            bottom: auto;
+            left: 0%;
+            right: auto;
+            width: 0.5vmin;
+            height: 6rem;
+            font-size: 0.1rem;
+        }
+            #scoreLeft:hover, #scoreLeft:focus{
+                display: flex;
+                position: absolute;
+                float:left;
+                clear: none;
+                top: 1%; 
+                left: 0%;
+                border: 1px black solid;
+                padding-inline: 10px;
+                width: auto;
+                height: 6rem;
+                font-size: 4.5rem;
+                font-weight: 700;
+                text-align: center;
+                align-content: stretch;
+                justify-content: space-around;
+                align-items: stretch;
+                color: black;
+            }
+
+        #scoreRight
+        {
+            display: flex;
+            position: absolute;
+            float:right;
+            clear: none;
+            top: 1%; 
+            bottom: auto;
+            right: 0%;
+            left: auto;
+            width: 0.5vmin;
+            height: 6rem;
+            font-size: 0.1rem;
+        }
+            #scoreRight:hover, #scoreRight:focus{
+                display: flex;
+                position: absolute;
+                float:right;
+                clear: none;
+                top: 1%; 
+                right: 0%;
+                border: 1px black solid;
+                width: auto;
+                height: 6rem;
+                font-size: 4.5rem;
+                font-weight: 700;
+                text-align: center;
+                align-content: center;
+                justify-content:space-around;
+                align-items: stretch;
+                color: black;
+            }
+
+
+        #settingsDiv * {
+            height: 100%;
+            display: none;
         }
 
-        scoreRight
-        {
-            display: inline;
-            margin-left: 50%;
+        #settingsDiv {
+            height: 100%;
+            width: 100%;
+            background-color: orange;
         }
+            #settingsDiv:hover, #settingsDiv:focus, #settingsDiv:hover *{
+                height: 100%;   
+                display: inline;
+                content-visibility: visible;
+                visibility: visible;
+
+            }
     </style>
 </head>
 <body>
     <label id="winNumLabel" for="winNumberInput" style="margin: 0 auto 0 auto; font-size:2rem; font-weight:400; display:none; justify-content:center; justify-self:center;"></label>
+    <div id="scoreRight">0</div>
+    <div id="scoreLeft">0</div>
     <canvas id="canvas" height="420" width="840"> </canvas>
     <div style="
     display: flex;
@@ -66,19 +143,12 @@
     flex-wrap: nowrap;
     font-size: 3rem;
     background-color: #1111111f;">
-        <span id="scoreLeft" style="
-    border: 1px black solid;
-    width: auto;
-    height: auto;
-    padding-inline: 10px;
-    background-color: red;
-">0</span>
+ 
         <button id="resetButton" margin-left="50%" style="height: fit-content; margin-top: auto; margin-bottom: auto; font-size: 1rem; background-color: #9f0000f5; color: floralwhite;">
             Reset Score
         </button>
-        <span id="scoreRight" style="border: 1px black solid;background-color: green;padding-inline: 10px;">0</span>
     </div>
-    <div style="display:inline-flex;">
+    <div id="settingsDiv" style="display:inline-flex;">
         <label for="aiCheckbox" style="margin-right: 2vw; border: 5px solid black; font-size: 2rem;">
             AI
             <input type="checkbox" id="aiCheckbox" checked onchange="toggleAI()" style="border: 5px solid black; border-right: 0px none white;" />
