@@ -9,10 +9,9 @@
             background-color: black;
             border: 1px solid blue;
             display: block;
-            margin: auto;
-            margin-right: 0.5vmin;
+            margin: auto auto;
             width: 95vw;
-            height: 80vh;
+            height: 85vh;
         }
 
         #scoreLeft
@@ -89,16 +88,47 @@
         }
 
         #settingsDiv {
-            height: 100%;
+            height: auto;
             width: 100%;
+            max-height: 3rem;
             background-color: orange;
+            position:absolute;
+            bottom: 0px;
+            left: 0;
+            right: 0;
+            top: auto;
         }
             #settingsDiv:hover, #settingsDiv:focus, #settingsDiv:hover *{
-                height: 100%;   
+                height: 100%;
+                max-height: 3rem;   
                 display: inline;
                 content-visibility: visible;
                 visibility: visible;
+            }
 
+            #settingsDiv h3{
+                display: flex;
+                position: fixed;
+                bottom: 0.1;
+                visibility: visible;
+                align-self: normal;
+                margin: 0% 45%;
+                color: rgb(29, 28, 28);
+                float: right;
+                clear: both;
+                justify-content: space-around;
+                text-align: center;
+                vertical-align: super;
+                align-content: start;
+                padding-bottom: 10%;
+
+            }
+
+            #settingsDiv:hover h3{
+                display: none;
+                visibility: none;
+                width: 0px;
+                height: 0px;
             }
     </style>
 </head>
@@ -143,15 +173,15 @@
     flex-wrap: nowrap;
     font-size: 3rem;
     background-color: #1111111f;">
- 
         <button id="resetButton" margin-left="50%" style="height: fit-content; margin-top: auto; margin-bottom: auto; font-size: 1rem; background-color: #9f0000f5; color: floralwhite;">
             Reset Score
         </button>
     </div>
-    <div id="settingsDiv" style="display:inline-flex;">
-        <label for="aiCheckbox" style="margin-right: 2vw; border: 5px solid black; font-size: 2rem;">
+    <div id="settingsDiv" onclick="" style="display:inline-flex;">
+        <h3>Settings</h3>
+        <label id="aiToggleBox" for="aiCheckbox" style="background-color: green; text-align: justify; width: 4.5rem; display: inline-flex; font-size: 1rem;">
             AI
-            <input type="checkbox" id="aiCheckbox" checked onchange="toggleAI()" style="border: 5px solid black; border-right: 0px none white;" />
+            <input type="checkbox" id="aiCheckbox" checked onchange="toggleAI()" style="width:1px; height:1px; color: transparent;" />
         </label>
         <label for="gameModeSelect">Play Style =</label>
         <select id="gameModeSelect" style="width: 30vw; height: 2.5rem; margin: 0 auto; text-align:center; font-size: 2rem; font-weight: 300;">
@@ -170,10 +200,10 @@
                 <option title="Score # times in a row to win" value="domination">No Contest</option>
                 <option title="Score the most points in # minutes to win" value="timedMatch">Timed Match</option>
             </select>
-            <input type="number" inert id="winNumberInput" min="1" step="1" value="3" name="winNumIn" style="display: inline-flex;font-size: 2rem; font-weight: 400; width:stretch; margin: 0 auto; opacity: 0;" />
+            <input type="number" inert id="winNumberInput" min="1" step="1" value="3" name="winNumIn" style="display: none;font-size: 0px; font-weight: 400; width:stretch; margin: 0 auto; opacity: 0;" />
         </div>
         <span id="winSubConditionIn">
-            <label id="winTimeLabel" for="winTimeInput" style="font-size:2rem; font-weight:400; display:none;"></label>
+            <label id="winTimeLabel" for="winTimeInput" style="font-size:0px; font-weight:400; display:none;"></label>
             <input type="time" id="winTimeInput" name="winTimeIn" style="display: none" />
         </span>
     </div>
@@ -189,7 +219,6 @@
     <audio hidden controls="controls" id="eeoo">
         <source src="./data/eeoootrimmed.mp3" type="audio/mp3" />
     </audio>
-    <!-- <script src="c:\users\cps13\source\repos\NodejsWebApp3\pages\css\JavaScript.js"></script>-->
     <script>
         {
             let vsAI = true;
@@ -1007,11 +1036,17 @@
             };
 
             const aiToggleInput = document.getElementById('aiCheckbox');
+            const aitb = document.getElementById('aiToggleBox');
+
             function toggleAI() {
                 vsAI = vsAI ? false : true;
                 if (!vsAI) {
                     topPaddle.dx = 0;
                     leftPaddle.dy = 0;
+                    aitb.style.backgroundColor = 'red';
+                }
+                else {
+                    aitb.style.backgroundColor = 'green';
                 }
             };
 
@@ -1107,52 +1142,7 @@
 
             window.onload = introAnimation();
         };
-        {
-            function celsiusToFahrenheit(degreesC) {
-                return (degreesC * (9 / 5)) + 32;
-            };
-
-            function decimalToHex(decimalValue) {
-                const clampedValue = Math.max(0, Math.min(decimalValue, 255));
-                const quotient = Math.floor(clampedValue / 16);
-                const remainder = clampedValue % 16;
-                const hexQuotient = toHexDigit(quotient);
-                const hexRemainder = toHexDigit(remainder);
-                return hexQuotient + hexRemainder;
-            };
-
-            function toHexDigit(decimal) {
-                // Define an array of hexadecimal digits
-                const hexDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
-                // Return the corresponding hexadecimal digit for the decimal value
-                return hexDigits[decimal];
-            };
-
-            function colourWeightsToHex(weight) {
-                return decimalToHex(weight);
-            };
-
-            function generateBRColor(value) {
-                // Calculate red value based on distance from 212
-                const red = Math.round(255 * Math.min(Math.abs(value - 212) / 180, 1)); // 180 is the maximum distance between 212 and 32
-
-                // Calculate blue value based on distance from -212
-                const blue = Math.round(255 * Math.min(Math.abs(value + 212) / 244, 1)); // 244 is the maximum distance between -212 and 32
-
-                // Green value set to 0
-                const green = 0;
-
-                // Convert RGB values to hexadecimal
-                const redHex = red.toString(16).padStart(2, '0');
-                const greenHex = green.toString(16).padStart(2, '0');
-                const blueHex = blue.toString(16).padStart(2, '0');
-
-                // Construct RGBA hex color code
-                const rgbaHex = `#${redHex}${greenHex}${blueHex}`;
-
-                return rgbaHex;
-            }
-        };
+ 
     </script>
 </body>
 </html>
